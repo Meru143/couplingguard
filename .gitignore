@@ -1,0 +1,23 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.coverage
+coverage.xml
+htmlcov/
+dist/
+build/
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.venv/
+venv/
+.env
+*.swp
+.DS_Store
+Thumbs.db
+
+# Local skill toolchain cache (synced from skills-lock.json)
+.agents/
+
