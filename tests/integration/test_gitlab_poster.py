@@ -69,8 +69,10 @@ def test_get_project_id_missing_raises() -> None:
 
 def test_find_existing_note_uses_all_pagination() -> None:
     mr = MagicMock()
-    n1 = MagicMock(); n1.body = "unrelated"
-    n2 = MagicMock(); n2.body = f"{MARKER}\nmine"
+    n1 = MagicMock()
+    n1.body = "unrelated"
+    n2 = MagicMock()
+    n2.body = f"{MARKER}\nmine"
     mr.notes.list.return_value = [n1, n2]
     assert find_existing_note(mr) is n2
     mr.notes.list.assert_called_once_with(all=True)

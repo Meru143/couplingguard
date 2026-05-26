@@ -17,7 +17,6 @@ from couplingguard.git_parser import (
 )
 from couplingguard.models import CouplingGuardError, ShallowCloneError
 
-
 # --- pure-function tests -------------------------------------------------
 
 

@@ -70,8 +70,10 @@ def test_dry_run_does_not_call_api(capsys: pytest.CaptureFixture[str]) -> None:
 
 def test_find_existing_skips_non_marker_comments() -> None:
     pr = MagicMock()
-    c1 = MagicMock(); c1.body = "random unrelated comment"
-    c2 = MagicMock(); c2.body = f"{MARKER}\nmine"
+    c1 = MagicMock()
+    c1.body = "random unrelated comment"
+    c2 = MagicMock()
+    c2.body = f"{MARKER}\nmine"
     pr.get_issue_comments.return_value = [c1, c2]
     found = find_existing_comment(pr)
     assert found is c2
