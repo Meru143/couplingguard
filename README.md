@@ -29,10 +29,10 @@
 The leverage point is *PR open time*, not the post-incident review. AI coding agents (Copilot, Claude Code, Cursor) now routinely land diffs touching 15–30 files at once; coupling risk has never been higher or harder to spot by scrolling a unified diff. This is the cheapest bug-prevention tool you can add to your stack: five lines of YAML, an MIT license, and a comment on every PR.
 
 <p align="center">
-  <img src="assets/animated-demo.svg" alt="Animated walkthrough: git log → co-change matrix → rendered PR comment" width="100%">
+  <img src="assets/couplingguard-demo.gif" alt="couplingguard 24-second product demo: title card → the pain → score formula → rendered PR comment → install snippet" width="100%">
 </p>
 
-> 📺 **Want an MP4 or GIF of the demo?** A Remotion project lives at [`demo/remotion/`](demo/remotion/) — `npm install && npm run build` produces a real video. The animated SVG above is the equivalent for inline rendering.
+> 🎬 **The demo above is a real rendered video** ([source MP4](assets/couplingguard-demo.mp4), 24 s, 1080p, 2.1 MB). Built with [Remotion](https://remotion.dev/) — the source composition lives at [`demo/remotion/`](demo/remotion/). Run `npm install && npm run build` in that folder to re-render it yourself (`npm run build:gif` produces the inline-embeddable version above). An accessible static SVG fallback is at [`assets/animated-demo.svg`](assets/animated-demo.svg).
 
 ## Who is this for?
 
@@ -293,11 +293,15 @@ tuning per repo type (solo, small team, monorepo, mature OSS library).
 
 ## Demo assets
 
-* Static SVGs (hero banner + animated walkthrough) live in
-  [`assets/`](assets/) and are embedded at the top of this README.
-* For MP4 / GIF renders, a Remotion project lives in
-  [`demo/remotion/`](demo/remotion/) — `npm install && npm run build`
-  produces a 1080p video.
+| Asset | Path | Size | Use |
+|---|---|---|---|
+| Rendered GIF demo | [`assets/couplingguard-demo.gif`](assets/couplingguard-demo.gif) | 1.4 MB | Embedded inline above; renders in any markdown viewer |
+| Source MP4 (1080p, H.264) | [`assets/couplingguard-demo.mp4`](assets/couplingguard-demo.mp4) | 2.1 MB | Tweet / LinkedIn / conference slides |
+| Hero banner | [`assets/hero-banner.svg`](assets/hero-banner.svg) | 4.5 KB | Top of this README, social previews, OG card |
+| Animated SVG fallback | [`assets/animated-demo.svg`](assets/animated-demo.svg) | 11 KB | Accessible alternative; scales infinitely; renders without raster decoding |
+| Remotion source | [`demo/remotion/`](demo/remotion/) | — | `npm install && npm run build` to re-render |
+
+The Remotion composition (`demo/remotion/src/CouplingDemo.tsx`) is a 24-second, 5-scene React composition: title card → the pain → the formula → rendered PR comment → install CTA. Edit the scenes, re-run `npm run build`, and the GIF / MP4 update.
 
 ## Contributing
 
