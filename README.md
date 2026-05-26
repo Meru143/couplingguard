@@ -223,7 +223,9 @@ A pair where `a.py` was touched 100 times, `b.py` 5 times, and both together 5 t
 - `5 / max(100, 5) = 0.05` → noise (file_a changes for many reasons)
 - `5 / max(5, 5) = 1.00` → genuine coupling (whenever one changes, so does the other)
 
-The formula is `score = co_changes / max(file_a_total_changes, file_b_total_changes)`. It produces a 0–1 ratio comparable across repos of any size and age. The full math, threshold defaults, and tuning advice are in the [coupling cheatsheet](docs/coupling-cheatsheet.md).
+The formula is `score = co_changes / max(file_a_total_changes, file_b_total_changes)`. It produces a 0–1 ratio comparable across repos of any size and age.
+
+📋 **See the [coupling cheatsheet](docs/coupling-cheatsheet.md)** for the full math, default thresholds, common couplings to look for, and per-repo-type tuning (solo, small team, monorepo, mature OSS library).
 
 ### Why does couplingguard need `fetch-depth: 0`?
 
@@ -284,24 +286,6 @@ Known constraints in v0.1.0:
 - **No auto-commit of dashboard files.** `publish_dashboard: true` produces an artifact; pushing the score JSON back to `main` for badge updates is on the v0.2 roadmap.
 - **GitLab self-managed not officially tested.** Should work via `CI_SERVER_URL` but only tested against gitlab.com.
 - **Bitbucket / Azure DevOps** — not supported in v0.1.0.
-
-## Coupling cheatsheet
-
-A [one-page reference](docs/coupling-cheatsheet.md) covering the score
-formula, risk thresholds, common couplings to look for, and recommended
-tuning per repo type (solo, small team, monorepo, mature OSS library).
-
-## Demo assets
-
-| Asset | Path | Size | Use |
-|---|---|---|---|
-| Rendered GIF demo | [`assets/couplingguard-demo.gif`](assets/couplingguard-demo.gif) | 1.4 MB | Embedded inline above; renders in any markdown viewer |
-| Source MP4 (1080p, H.264) | [`assets/couplingguard-demo.mp4`](assets/couplingguard-demo.mp4) | 2.1 MB | Tweet / LinkedIn / conference slides |
-| Hero banner | [`assets/hero-banner.svg`](assets/hero-banner.svg) | 4.5 KB | Top of this README, social previews, OG card |
-| Animated SVG fallback | [`assets/animated-demo.svg`](assets/animated-demo.svg) | 11 KB | Accessible alternative; scales infinitely; renders without raster decoding |
-| Remotion source | [`demo/remotion/`](demo/remotion/) | — | `npm install && npm run build` to re-render |
-
-The Remotion composition (`demo/remotion/src/CouplingDemo.tsx`) is a 24-second, 5-scene React composition: title card → the pain → the formula → rendered PR comment → install CTA. Edit the scenes, re-run `npm run build`, and the GIF / MP4 update.
 
 ## Contributing
 
