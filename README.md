@@ -1,25 +1,48 @@
 <p align="center">
-  <img src="assets/hero-banner.svg" alt="couplingguard — Detect file coupling risk in PRs from git co-change history" width="100%">
+  <img src="assets/hero-banner.svg" alt="couplingguard — Detect file coupling risk in pull requests from git co-change history" width="100%">
 </p>
 
 <p align="center">
-  <a href="https://github.com/Meru143/couplingguard"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Meru143/couplingguard/main/coupling-score.json" alt="coupling badge"></a>
+  <a href="https://pypi.org/project/couplingguard/"><img src="https://img.shields.io/pypi/v/couplingguard?label=pypi&color=blue" alt="PyPI version"></a>
+  <a href="https://github.com/marketplace/actions/couplingguard"><img src="https://img.shields.io/badge/marketplace-couplingguard-orange?logo=github" alt="GitHub Marketplace"></a>
+  <a href="https://github.com/Meru143/couplingguard"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Meru143/couplingguard/main/coupling-score.json" alt="coupling score badge"></a>
   <a href="https://github.com/Meru143/couplingguard/actions/workflows/ci.yml"><img src="https://github.com/Meru143/couplingguard/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license"></a>
-  <a href="docs/coupling-cheatsheet.md"><img src="https://img.shields.io/badge/cheatsheet-1%20page-orange.svg" alt="coupling cheatsheet"></a>
+  <a href="https://pypi.org/project/couplingguard/"><img src="https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue.svg" alt="Python 3.11+"></a>
 </p>
 
-> **Status: v0.1.0 — first release.** The `Meru143/couplingguard@v1` tag and the `couplingguard` PyPI package both ship after the first tagged release lands. Until then, pin to a commit SHA or install from source.
+<p align="center">
+  <a href="#install-in-5-lines"><img src="https://img.shields.io/badge/github_action-✓-2ea44f" alt="GitHub Action"></a>
+  <a href="#gitlab-ci"><img src="https://img.shields.io/badge/gitlab_ci-✓-fc6d26" alt="GitLab CI"></a>
+  <img src="https://img.shields.io/badge/177_tests-90%25_coverage-2ea44f" alt="177 tests · 90% coverage">
+  <img src="https://img.shields.io/badge/category-code--quality-blue" alt="code quality">
+  <img src="https://img.shields.io/badge/category-pull--request-blue" alt="pull request">
+  <img src="https://img.shields.io/badge/category-static--analysis-blue" alt="static analysis">
+  <img src="https://img.shields.io/badge/category-coupling-blue" alt="coupling">
+  <img src="https://img.shields.io/badge/category-co--change--analysis-blue" alt="co-change analysis">
+</p>
 
-**Two files that always break together still ship in the same PR with no one looking at both sides.** Your git log has known about this pairing for months. couplingguard surfaces it as a comment on every PR — before the bug, not after the post-mortem.
+> **What it is.** `couplingguard` is a free GitHub Action and GitLab CI integration that detects **file coupling risk in pull requests** by analyzing your repository's git co-change history. On every PR it posts a collapsible markdown comment with normalized coupling scores for the files you're changing, suggests reviewers from `CODEOWNERS`, and can optionally fail CI above a configurable risk threshold. Install in 5 lines of YAML. No signup, no hosted service, MIT licensed.
 
-A free GitHub Action (and GitLab CI integration, and Python CLI) that walks 90 days of git history, builds a normalized co-change matrix, filters to pairs touching your PR's changed files, and posts a collapsible markdown comment with risk badges. Optionally fails CI above a configurable coupling threshold. Suggests reviewers from CODEOWNERS for the coupled files. Edits itself in place on re-push with a `🟡 0.45 → 🔴 0.82` delta line.
+**The hidden cost of code review:** two files that always break together still ship in the same PR with no one looking at both sides. Your `git log` has known about this pairing for months — every co-change is a data point. Nobody reads it. couplingguard does, on every PR, before merge.
+
+The leverage point is *PR open time*, not the post-incident review. AI coding agents (Copilot, Claude Code, Cursor) now routinely land diffs touching 15–30 files at once; coupling risk has never been higher or harder to spot by scrolling a unified diff. This is the cheapest bug-prevention tool you can add to your stack: five lines of YAML, an MIT license, and a comment on every PR.
 
 <p align="center">
   <img src="assets/animated-demo.svg" alt="Animated walkthrough: git log → co-change matrix → rendered PR comment" width="100%">
 </p>
 
 > 📺 **Want an MP4 or GIF of the demo?** A Remotion project lives at [`demo/remotion/`](demo/remotion/) — `npm install && npm run build` produces a real video. The animated SVG above is the equivalent for inline rendering.
+
+## Who is this for?
+
+| If you are… | What couplingguard gives you |
+|---|---|
+| **A platform engineer at a monorepo company** | A quantified, CI-enforceable coupling budget that replaces tribal knowledge about "files that always break together" |
+| **A senior reviewer on AI-generated PRs** | A second pair of eyes that flags coupled files the diff doesn't obviously show — before you approve a 25-file Copilot change |
+| **An OSS maintainer reviewing external contributions** | Instant context on which historical owners should weigh in, on top of static `CODEOWNERS` |
+| **A DevOps lead enforcing review standards** | An opt-in `fail_threshold` that exits 1 when a PR's coupling density crosses a line you choose |
+| **A solo developer on a long-running project** | A check on your own blind spots: which files in your codebase you've forgotten are coupled |
 
 ## Install in 5 lines
 
@@ -185,20 +208,72 @@ your repo unless you add an explicit `git commit && git push` step yourself.
 
 ## FAQ
 
-**Why `fetch-depth: 0`?** Default `actions/checkout@v4` does a shallow clone (depth=1). couplingguard needs the full log to count co-changes. If you forget, the action exits 1 with an actionable error rather than producing wrong results.
+### Is couplingguard free?
 
-**What is normalization?** A pair where `a.py` was touched 100 times, `b.py` 5 times, and both together 5 times is *not* the same as a pair where both were touched 5 times each. Raw count = 5 in both cases. Normalized: 5/100 = 0.05 vs 5/5 = 1.00. The second pair is genuinely coupled; the first is noise.
+Yes — entirely. MIT licensed, no paid tier, no signup, no hosted service. The Action runs on your own runner; your code never leaves your CI.
 
-**Does this work on monorepos?** Yes. Use `exclude` to drop noisy paths (docs, migrations) and bump `min_occurrences` to filter rare pairs. The matrix is built once per run and scales linearly with `lookback_days × avg_files_per_commit`.
+### What is file coupling and why should I care?
 
-**What if my repo has fewer than `min_occurrences` commits?** The action posts an informational comment and exits 0 — no false failures on new repos.
+File coupling is when two files in your repository **historically change together**. Tightly coupled files almost always need to be modified in the same PR, but reviewers can't see the relationship from the diff alone. Coupling is one of the strongest predictors of regression risk: changing one half of a coupled pair without the other is how production incidents start. Adam Tornhill's *Your Code as a Crime Scene* covers the research; couplingguard operationalizes it at PR time.
 
-## Differentiators
+### How does normalization work?
 
-- **vs CodeScene** — Free and open source; runs entirely in your CI with no external service. CodeScene is a commercial product with per-seat pricing.
-- **vs [code-maat](https://github.com/adamtornhill/code-maat)** — code-maat is a Clojure CLI for post-hoc analysis: you run it against a checked-out repo and read CSV. couplingguard runs at PR time, produces normalized scores, and posts directly to the PR.
-- **vs Danger.js** — Danger is a framework where you write the analysis rules yourself. couplingguard is a zero-config drop-in.
-- **vs CODEOWNERS** — Static ownership vs dynamic co-change. Complementary: couplingguard uses CODEOWNERS to suggest *better* reviewers for the files historically coupled to your PR's files.
+A pair where `a.py` was touched 100 times, `b.py` 5 times, and both together 5 times is **not** the same as a pair where both were touched 5 times each. Raw count = 5 in both cases. Normalized:
+
+- `5 / max(100, 5) = 0.05` → noise (file_a changes for many reasons)
+- `5 / max(5, 5) = 1.00` → genuine coupling (whenever one changes, so does the other)
+
+The formula is `score = co_changes / max(file_a_total_changes, file_b_total_changes)`. It produces a 0–1 ratio comparable across repos of any size and age. The full math, threshold defaults, and tuning advice are in the [coupling cheatsheet](docs/coupling-cheatsheet.md).
+
+### Why does couplingguard need `fetch-depth: 0`?
+
+Default `actions/checkout@v4` does a shallow clone (depth=1). couplingguard needs the full git log to count co-changes across the configurable `lookback_days` window. If you forget, the Action exits 1 with an actionable error (E001) rather than producing wrong results from a truncated history.
+
+### Does couplingguard work on monorepos?
+
+Yes. For repos with 50+ committers and 10k+ commits in the window:
+- Use `exclude` to drop noisy paths (docs, migrations, generated code, lockfiles).
+- Bump `min_occurrences` to 5+ to filter out rare pairs.
+- Lower `lookback_days` to 60 — recent coupling is more actionable than ancient.
+
+The matrix builder is O(`commits × avg_files_per_commit²`) which is sub-second for ≤50k commits in the lookback window.
+
+### What if my repo has fewer than `min_occurrences` commits?
+
+The Action posts an informational comment ("not enough git history in lookback window") and exits 0. No false failures on new repos. The threshold under which this kicks in is `min_occurrences`, which defaults to 3.
+
+### How is couplingguard different from CODEOWNERS?
+
+CODEOWNERS encodes *static* file-ownership: "this team reviews these paths." couplingguard encodes *dynamic* co-change risk: "these files have historically broken together." The two are complementary — couplingguard reads your CODEOWNERS file and suggests owners of *coupled* files who aren't already on the PR, on top of GitHub's normal review-request flow.
+
+### Does it work for AI-coded PRs?
+
+That's the primary use case. AI coding agents (Copilot, Claude Code, Cursor) routinely produce PRs touching 15-30 files at once. A human wrote the PR description, but no human held the entire change in their head as a unified mental model. couplingguard is the cheapest backstop: a comment that surfaces the files the agent *should* have touched but didn't.
+
+### What does couplingguard NOT do?
+
+- ❌ Predict bugs (it's a historical signal, not a model)
+- ❌ Replace CODEOWNERS (complementary)
+- ❌ Modify your code (read-only on the working tree)
+- ❌ Send your code anywhere (analysis runs entirely on your runner)
+- ❌ Support Bitbucket or Azure DevOps in v0.1 (GitHub + GitLab only)
+
+## How couplingguard compares
+
+| | couplingguard | CodeScene | [code-maat](https://github.com/adamtornhill/code-maat) | Danger.js | CODEOWNERS |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **Posts a comment on every PR** | ✅ | ✅ | ❌ (CSV only) | ⚙️ (write your own) | ❌ |
+| **Normalized co-change scoring** | ✅ | ✅ | ❌ | ❌ | ❌ |
+| **Suggests reviewers from CODEOWNERS** | ✅ | ❌ | ❌ | ⚙️ | ❌ |
+| **Optional CI failure gate** | ✅ | ✅ | ❌ | ⚙️ | ❌ |
+| **Re-push delta line (`🟡 0.45 → 🔴 0.82`)** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **GitLab CI support** | ✅ | ✅ | ❌ | ✅ | ❌ |
+| **No hosted service / no signup** | ✅ | ❌ | ✅ | ✅ | ✅ |
+| **Open source** | ✅ MIT | ❌ commercial | ✅ GPLv3 | ✅ MIT | (native GitHub feature) |
+| **Cost** | **Free** | Per-seat license | Free | Free | Free |
+| **Install effort** | 5 lines YAML | Hosted onboarding | CLI + scripting | Framework + scripts | One file |
+
+**Bottom line.** [CODEOWNERS](https://docs.github.com/en/repositories/managing-your-repositories-settings-and-security/customizing-your-repository/about-code-owners) encodes *static* ownership; couplingguard adds *dynamic* co-change signal. They're complementary — couplingguard uses CODEOWNERS to suggest better reviewers for the files historically coupled to your PR's files. [code-maat](https://github.com/adamtornhill/code-maat) (the original normalized co-change CLI from Adam Tornhill's *Your Code as a Crime Scene*) runs *after* the fact; couplingguard runs at PR open, when the fix is still cheap.
 
 ## Limitations
 

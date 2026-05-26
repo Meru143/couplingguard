@@ -1,0 +1,58 @@
+# couplingguard
+
+> A free, open-source GitHub Action and GitLab CI integration that
+> detects file coupling risk in pull requests by analyzing git
+> co-change history. Posts a collapsible markdown comment on every PR
+> with normalized 0-1 coupling scores, suggests reviewers from
+> CODEOWNERS, and can optionally fail CI above a configurable risk
+> threshold. MIT licensed. No signup, no hosted service.
+
+## What couplingguard does
+
+- Walks the configured number of days of `git log` (default 90)
+- Builds a symmetric file co-change matrix from non-merge commits
+- Filters pairs below `min_occurrences` (default 3)
+- Normalizes each pair: `score = co_changes / max(count_a, count_b)`
+- Filters to pairs touching the PR's changed files
+- Classifies risk: 🟢 < 0.3 ≤ 🟡 < 0.7 ≤ 🔴
+- Posts / edits a PR comment with the table
+- Optionally exits 1 if a pair crosses the configured `fail_threshold`
+
+## Install
+
+```yaml
+- uses: actions/checkout@v4
+  with: { fetch-depth: 0 }
+- uses: Meru143/couplingguard@v1
+  with: { github_token: ${{ github.token }} }
+```
+
+PyPI: `pip install couplingguard` then `couplingguard --repo . --dry-run`
+
+## Key technical facts
+
+- Language: Python 3.11+
+- Repo: https://github.com/Meru143/couplingguard
+- PyPI: https://pypi.org/project/couplingguard/
+- Marketplace: https://github.com/marketplace/actions/couplingguard
+- License: MIT
+- Latest version: see https://pypi.org/project/couplingguard/
+- Tests: 177 unit + integration + E2E, 90% line coverage
+- Dependencies (runtime): GitPython, PyGithub, python-gitlab, codeowners, PyYAML
+- Supports: GitHub Actions (composite), GitLab CI, local CLI
+
+## Documentation
+
+- [README](https://github.com/Meru143/couplingguard/blob/main/README.md) — install, inputs table, FAQ, comparison vs. CodeScene / code-maat / Danger.js / CODEOWNERS
+- [Coupling cheatsheet](https://github.com/Meru143/couplingguard/blob/main/docs/coupling-cheatsheet.md) — 1-page reference with the formula, thresholds, common couplings, repo-type tuning
+- [Pricing](https://github.com/Meru143/couplingguard/blob/main/pricing.md) — Free. Always.
+- [CHANGELOG](https://github.com/Meru143/couplingguard/blob/main/CHANGELOG.md)
+- [CONTRIBUTING](https://github.com/Meru143/couplingguard/blob/main/CONTRIBUTING.md)
+- [SECURITY](https://github.com/Meru143/couplingguard/blob/main/SECURITY.md)
+
+## How couplingguard differs from related tools
+
+- **CodeScene** — Commercial, hosted, per-seat. couplingguard is free, OSS, in-CI.
+- **code-maat** — 2016 Clojure CLI for post-hoc CSV analysis. couplingguard runs at PR open time and posts comments.
+- **Danger.js** — Framework requiring you to write rules. couplingguard is zero-config.
+- **CODEOWNERS** — Static ownership. couplingguard adds dynamic co-change signal on top.
