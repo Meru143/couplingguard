@@ -128,6 +128,14 @@ def get_commits(
     since = (datetime.now() - timedelta(days=lookback_days)).strftime("%Y-%m-%d")
     patterns = exclude_patterns or []
 
+    # Bail early for repos that have no commits yet — iter_commits would
+    # raise GitCommandError("bad revision 'HEAD'").
+    try:
+        repo.head.commit
+    except (ValueError, git.exc.GitCommandError):
+        log.debug("get_commits: repo has no HEAD; returning empty list.")
+        return []
+
     out: list[list[str]] = []
     for commit in repo.iter_commits(rev="HEAD", no_merges=True, since=since):
         raw_files = [str(k) for k in commit.stats.files]
