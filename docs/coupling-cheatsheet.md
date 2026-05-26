@@ -104,7 +104,7 @@ override.
 - ❌ Replace CODEOWNERS. It complements them.
 - ❌ Modify your code. Read-only on the working tree.
 - ❌ Send your code anywhere. All analysis is local to your runner.
-- ❌ Handle Bitbucket or Azure DevOps (in v0.1.0).
+- ❌ Handle Bitbucket or Azure DevOps yet. Open an issue to vote it up the roadmap.
 
 ---
 
