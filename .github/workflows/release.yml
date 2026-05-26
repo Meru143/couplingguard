@@ -17,6 +17,13 @@ jobs:
   release:
     runs-on: ubuntu-latest
     concurrency: release
+    # Must match the GitHub Actions environment configured in
+    # Settings -> Environments. The PyPI Trusted Publisher claim
+    # rejects the OIDC token if this string doesn't match the
+    # 'Environment name' set in the PyPI publisher config.
+    environment:
+      name: pypi
+      url: https://pypi.org/project/couplingguard/
     steps:
       - uses: actions/checkout@v4
         with:
