@@ -157,21 +157,17 @@ old / large files, while `co_count / max(count_a, count_b)` produces a
 
 ## Local CLI
 
-After v0.1.0 ships on PyPI:
-
 ```bash
 pip install couplingguard
 couplingguard --repo . --dry-run --lookback-days 90
 ```
 
-Pre-release (install from source):
+The CLI uses the same code path as the Action — `--dry-run` prints
+the rendered PR comment to stdout without reaching GitHub, so you
+can preview what couplingguard would post against any local repo.
 
-```bash
-pip install git+https://github.com/Meru143/couplingguard.git@main
-couplingguard --repo . --dry-run --lookback-days 90
-```
-
-The CLI uses the same code as the Action; `--dry-run` prints the rendered comment to stdout without trying to reach GitHub.
+Run `couplingguard --help` for the full flag list (every Action input
+has a matching CLI flag).
 
 ## GitLab CI
 
@@ -279,13 +275,13 @@ That's the primary use case. AI coding agents (Copilot, Claude Code, Cursor) rou
 
 ## Limitations
 
-Known constraints in v0.1.0:
+Known constraints in v0.1.1:
 
 - **Shallow clones are rejected.** Detected and surfaced as error E001 with an actionable message. Add `fetch-depth: 0` (GitHub) or `GIT_DEPTH: "0"` (GitLab).
 - **PR file cap at 200.** PRs touching more than 200 files are truncated with a warning. The pairs analysis is O(200 × matrix_size), so this is a deliberate ceiling.
 - **No auto-commit of dashboard files.** `publish_dashboard: true` produces an artifact; pushing the score JSON back to `main` for badge updates is on the v0.2 roadmap.
-- **GitLab self-managed not officially tested.** Should work via `CI_SERVER_URL` but only tested against gitlab.com.
-- **Bitbucket / Azure DevOps** — not supported in v0.1.0.
+- **GitLab self-managed not officially tested.** Should work via `CI_SERVER_URL` but only verified against gitlab.com.
+- **Bitbucket / Azure DevOps** — not supported yet. Open an issue if you want to vote it up the roadmap.
 
 ## Contributing
 
