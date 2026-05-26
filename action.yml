@@ -1,0 +1,94 @@
+name: "couplingguard"
+description: "Detect file coupling risk in PRs using git co-change history. Zero-config, no external services."
+author: "Meru143"
+
+branding:
+  icon: "git-branch"
+  color: "orange"
+
+inputs:
+  github_token:
+    description: "GitHub token used to read PR info and post the coupling comment."
+    required: false
+    default: ${{ github.token }}
+  gitlab_token:
+    description: "GitLab personal access token (only used when running on GitLab CI)."
+    required: false
+    default: ""
+  lookback_days:
+    description: "Days of git history to analyze."
+    required: false
+    default: "90"
+  min_occurrences:
+    description: "Minimum co-change count to include a pair."
+    required: false
+    default: "3"
+  max_pairs:
+    description: "Maximum pairs to show in the PR comment."
+    required: false
+    default: "10"
+  low_threshold:
+    description: "Score boundary for low risk (🟢)."
+    required: false
+    default: "0.3"
+  high_threshold:
+    description: "Score boundary for high risk (🔴)."
+    required: false
+    default: "0.7"
+  fail_threshold:
+    description: "Exit 1 if any pair crosses this level: 'low', 'medium', or 'high'. Empty disables CI failure."
+    required: false
+    default: ""
+  exclude:
+    description: "Newline-separated glob patterns to exclude from analysis."
+    required: false
+    default: ""
+  publish_dashboard:
+    description: "Set true to write coupling-history.json, coupling-dashboard.html, and coupling-score.json."
+    required: false
+    default: "false"
+  dry_run:
+    description: "Set true to print the comment to stdout instead of posting it."
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install couplingguard
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install "${GITHUB_ACTION_PATH}"
+
+    - name: Run couplingguard
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GITLAB_TOKEN: ${{ inputs.gitlab_token }}
+        INPUT_LOOKBACK_DAYS: ${{ inputs.lookback_days }}
+        INPUT_MIN_OCCURRENCES: ${{ inputs.min_occurrences }}
+        INPUT_MAX_PAIRS: ${{ inputs.max_pairs }}
+        INPUT_LOW_THRESHOLD: ${{ inputs.low_threshold }}
+        INPUT_HIGH_THRESHOLD: ${{ inputs.high_threshold }}
+        INPUT_FAIL_THRESHOLD: ${{ inputs.fail_threshold }}
+        INPUT_EXCLUDE: ${{ inputs.exclude }}
+        INPUT_PUBLISH_DASHBOARD: ${{ inputs.publish_dashboard }}
+        INPUT_DRY_RUN: ${{ inputs.dry_run }}
+      run: couplingguard --repo "${GITHUB_WORKSPACE}"
+
+    - name: Upload coupling dashboard artifact
+      if: inputs.publish_dashboard == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: coupling-dashboard
+        path: |
+          coupling-dashboard.html
+          coupling-history.json
+          coupling-score.json
+        if-no-files-found: ignore
