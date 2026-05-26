@@ -33,20 +33,35 @@ jobs:
 
 ## What the PR comment looks like
 
-```
-🔍 couplingguard — 2 pairs detected, highest risk: 🔴 0.82
+Here's a real example from running couplingguard against its own repo
+(synthetic PR diffing `efa4b1d..b51434a`):
 
+> 🔍 **couplingguard — 6 pairs detected, highest risk: 🔴 1.00**
+>
+> | File in PR | Coupled With | Score | Risk | Co-changes |
+> |---|---|---|---|---|
+> | `pyproject.toml` | `skills-lock.json` | 1.00 | 🔴 High | 2/2 commits |
+> | `.gitignore` | `README.md` | 0.67 | 🟡 Medium | 2/3 commits |
+> | `.gitignore` | `pyproject.toml` | 0.67 | 🟡 Medium | 2/3 commits |
+> | `.gitignore` | `skills-lock.json` | 0.67 | 🟡 Medium | 2/3 commits |
+>
+> _Suggested reviewers for coupled files: @team-infra_
+
+A more elaborate example with score-delta on re-push and CODEOWNERS-based reviewer suggestions:
+
+> 🔍 **couplingguard — 2 pairs detected, highest risk: 🔴 0.82**
+>
 > ⚠️ Score changed since last push: 🟡 0.45 → 🔴 0.82 ↑
+>
+> | File in PR | Coupled With | Score | Risk | Co-changes |
+> |---|---|---|---|---|
+> | `src/payment.py` | `src/billing.py` | 0.82 | 🔴 High | 41/50 commits |
+> | `src/payment.py` | `tests/test_billing.py` | 0.64 | 🟡 Medium | 32/50 commits |
+>
+> _Suggested reviewers for coupled files: @alice, @team-payments_
 
-| File in PR        | Coupled With            | Score | Risk      | Co-changes      |
-|-------------------|-------------------------|-------|-----------|-----------------|
-| `src/payment.py`  | `src/billing.py`        | 0.82  | 🔴 High   | 41/50 commits   |
-| `src/payment.py`  | `tests/test_billing.py` | 0.64  | 🟡 Medium | 32/50 commits   |
-
-Suggested reviewers for coupled files: @alice, @team-payments
-```
-
-The comment is collapsible (`<details>`-wrapped) and edits itself on every push to the PR with a "score changed" line showing the delta.
+The comment is collapsible (`<details>`-wrapped) and edits itself on
+every push to the PR with a "score changed" line showing the delta.
 
 ## Inputs
 
@@ -66,26 +81,34 @@ The comment is collapsible (`<details>`-wrapped) and edits itself on every push 
 
 ## How it works
 
-```
-git log (lookback_days, no-merges)
-   │
-   ▼
-co-change matrix  (file pairs x commit count)
-   │
-   ▼
-normalize         (score = co_count / max(file_a_commits, file_b_commits))
-   │
-   ▼
-PR filter         (only pairs where one side is in PR.changed_files)
-   │
-   ▼
-classify          (🟢 < 0.3 ≤ 🟡 < 0.7 ≤ 🔴)
-   │
-   ▼
-render + post
+```mermaid
+flowchart TD
+    A[git log<br/>lookback_days, no-merges] --> B[co-change matrix<br/>file pairs × commit count]
+    B --> C[normalize<br/>score = co_count / max&#40;count_a, count_b&#41;]
+    C --> D{filter by<br/>min_occurrences}
+    D --> E[PR analyzer<br/>keep pairs touching PR files]
+    E --> F[classify risk<br/>🟢 &lt; 0.3 ≤ 🟡 &lt; 0.7 ≤ 🔴]
+    F --> G[CODEOWNERS lookup<br/>suggest reviewers]
+    G --> H[render markdown<br/>+ hidden JSON marker]
+    H --> I[find existing<br/>PR comment by marker]
+    I -->|exists| J[edit in place<br/>with delta line]
+    I -->|new| K[create issue comment]
+    J --> L[fail_threshold check<br/>exit 0 / 1]
+    K --> L
+    L --> M{publish_dashboard?}
+    M -->|yes| N[append history JSON<br/>+ Chart.js HTML<br/>+ shields.io badge]
+    M -->|no| O[done]
+    N --> O
+
+    style A fill:#fef3c7,stroke:#f59e0b,color:#000
+    style C fill:#dbeafe,stroke:#3b82f6,color:#000
+    style F fill:#fce7f3,stroke:#ec4899,color:#000
+    style L fill:#dcfce7,stroke:#16a34a,color:#000
 ```
 
-The key insight is normalization: raw co-change counts inflate for old/big files, while `co / max(count)` produces a 0–1 ratio that's comparable across repos of any size and age.
+The key insight is **normalization**: raw co-change counts inflate for
+old / large files, while `co_count / max(count_a, count_b)` produces a
+0–1 ratio that's comparable across repos of any size and age.
 
 ## Local CLI
 
