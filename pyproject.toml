@@ -10,7 +10,7 @@ readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"
 authors = [{ name = "Meru143" }]
-keywords = ["github-action", "coupling", "code-quality", "pull-request", "static-analysis"]
+keywords = ["github-action", "coupling", "code-quality", "pull-request", "static-analysis", "git", "ci"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
