@@ -6,7 +6,7 @@
   <a href="https://github.com/Meru143/couplingguard"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Meru143/couplingguard/main/coupling-score.json" alt="coupling badge"></a>
   <a href="https://github.com/Meru143/couplingguard/actions/workflows/ci.yml"><img src="https://github.com/Meru143/couplingguard/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license"></a>
-  <a href="docs/marketing/coupling-cheatsheet.md"><img src="https://img.shields.io/badge/cheatsheet-1%20page-orange.svg" alt="coupling cheatsheet"></a>
+  <a href="docs/coupling-cheatsheet.md"><img src="https://img.shields.io/badge/cheatsheet-1%20page-orange.svg" alt="coupling cheatsheet"></a>
 </p>
 
 > **Status: v0.1.0 — first release.** The `Meru143/couplingguard@v1` tag and the `couplingguard` PyPI package both ship after the first tagged release lands. Until then, pin to a commit SHA or install from source.
@@ -210,17 +210,19 @@ Known constraints in v0.1.0:
 - **GitLab self-managed not officially tested.** Should work via `CI_SERVER_URL` but only tested against gitlab.com.
 - **Bitbucket / Azure DevOps** — not supported in v0.1.0.
 
-## Marketing kit
+## Coupling cheatsheet
 
-If you're forking, extending, or just curious about how this is positioned:
-all the launch copy lives in [`docs/marketing/`](docs/marketing/) —
-launch tweet thread, Show HN draft, blog post, Marketplace listing copy,
-launch-day playbook, and a 1-page **coupling cheatsheet** ([read it](docs/marketing/coupling-cheatsheet.md))
-that doubles as a lead-magnet PDF.
+A [one-page reference](docs/coupling-cheatsheet.md) covering the score
+formula, risk thresholds, common couplings to look for, and recommended
+tuning per repo type (solo, small team, monorepo, mature OSS library).
 
-Video / GIF assets render from the Remotion project at
-[`demo/remotion/`](demo/remotion/). Static SVG assets (hero banner +
-animated demo) live at [`assets/`](assets/) and are embedded above.
+## Demo assets
+
+* Static SVGs (hero banner + animated walkthrough) live in
+  [`assets/`](assets/) and are embedded at the top of this README.
+* For MP4 / GIF renders, a Remotion project lives in
+  [`demo/remotion/`](demo/remotion/) — `npm install && npm run build`
+  produces a 1080p video.
 
 ## Contributing
 
