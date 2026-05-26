@@ -1,8 +1,13 @@
 name: Release
 
+# Run only when explicitly dispatched or when a vX.Y.Z tag is pushed.
+# This avoids semantic-release attempting to publish on every commit
+# to main before PyPI Trusted Publishing is configured.
 on:
+  workflow_dispatch:
   push:
-    branches: [main]
+    tags:
+      - "v*.*.*"
 
 permissions:
   contents: write
@@ -24,6 +29,9 @@ jobs:
 
       - name: Install build tooling
         run: pip install python-semantic-release build
+
+      - name: Build distribution
+        run: python -m build
 
       - name: Run semantic-release
         id: release
