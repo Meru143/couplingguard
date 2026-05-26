@@ -3,7 +3,9 @@
 [![coupling](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Meru143/couplingguard/main/coupling-score.json)](https://github.com/Meru143/couplingguard)
 [![CI](https://github.com/Meru143/couplingguard/actions/workflows/ci.yml/badge.svg)](https://github.com/Meru143/couplingguard/actions/workflows/ci.yml)
 
-Detect file coupling risk in pull requests from git co-change history. A free GitHub Action that posts a collapsible HTML comment on every PR with normalized coupling scores for the changed files, suggests reviewers from CODEOWNERS for the coupled files, edits itself with a delta line on re-push, and can optionally fail the build above a configurable threshold.
+> **Status: v0.1.0 — first release.** The `Meru143/couplingguard@v1` tag and the `couplingguard` PyPI package both ship after the first tagged release lands. Until then, pin to a commit SHA or install from source.
+
+Detect file coupling risk in pull requests from git co-change history. A free GitHub Action that posts a collapsible markdown comment on every PR with normalized coupling scores for the changed files, suggests reviewers from CODEOWNERS for the coupled files, edits itself with a delta line on re-push, and can optionally fail the build above a configurable threshold.
 
 GitLab CI is supported via the same algorithm — set `GITLAB_TOKEN` and the action posts an MR note instead.
 
@@ -33,21 +35,29 @@ jobs:
 
 ## What the PR comment looks like
 
-Here's a real example from running couplingguard against its own repo
-(synthetic PR diffing `efa4b1d..b51434a`):
+**Real output** from running couplingguard against its own repository
+(synthetic PR over 10 commits of real history, captured from
+`tests/e2e/test_dogfood.py`):
 
 > 🔍 **couplingguard — 6 pairs detected, highest risk: 🔴 1.00**
 >
 > | File in PR | Coupled With | Score | Risk | Co-changes |
 > |---|---|---|---|---|
 > | `pyproject.toml` | `skills-lock.json` | 1.00 | 🔴 High | 2/2 commits |
-> | `.gitignore` | `README.md` | 0.67 | 🟡 Medium | 2/3 commits |
+> | `tests/integration/test_github_poster.py` | `tests/integration/test_gitlab_poster.py` | 1.00 | 🔴 High | 2/2 commits |
 > | `.gitignore` | `pyproject.toml` | 0.67 | 🟡 Medium | 2/3 commits |
 > | `.gitignore` | `skills-lock.json` | 0.67 | 🟡 Medium | 2/3 commits |
->
-> _Suggested reviewers for coupled files: @team-infra_
 
-A more elaborate example with score-delta on re-push and CODEOWNERS-based reviewer suggestions:
+Note the paired integration test files at 1.00 — `test_github_poster.py` and
+`test_gitlab_poster.py` always land in the same commit because they cover
+mirror-image functionality. A reviewer looking only at the GitHub test
+file would benefit from knowing the GitLab one almost certainly changed
+too.
+
+**Illustrative example** showing the score-delta line on re-push and
+CODEOWNERS-based reviewer suggestions (the names are placeholders — the
+real action only suggests usernames that actually appear in your
+`CODEOWNERS` file):
 
 > 🔍 **couplingguard — 2 pairs detected, highest risk: 🔴 0.82**
 >
@@ -112,8 +122,17 @@ old / large files, while `co_count / max(count_a, count_b)` produces a
 
 ## Local CLI
 
+After v0.1.0 ships on PyPI:
+
 ```bash
 pip install couplingguard
+couplingguard --repo . --dry-run --lookback-days 90
+```
+
+Pre-release (install from source):
+
+```bash
+pip install git+https://github.com/Meru143/couplingguard.git@main
 couplingguard --repo . --dry-run --lookback-days 90
 ```
 
@@ -124,24 +143,33 @@ The CLI uses the same code as the Action; `--dry-run` prints the rendered commen
 ```yaml
 coupling:
   image: python:3.11
+  variables:
+    GIT_DEPTH: "0"                     # required: GitLab clones shallow by default
+    GITLAB_TOKEN: ${GITLAB_TOKEN}
   script:
     - pip install couplingguard
     - couplingguard --repo .
-  variables:
-    GITLAB_TOKEN: ${GITLAB_TOKEN}
   only:
     - merge_requests
 ```
 
-`CI_SERVER_URL`, `CI_PROJECT_ID`, and `CI_MERGE_REQUEST_IID` are auto-set by every GitLab Runner.
+`CI_SERVER_URL`, `CI_PROJECT_ID`, and `CI_MERGE_REQUEST_IID` are
+auto-set by every GitLab Runner. `GITLAB_TOKEN` should be a
+[project access token](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html)
+with the `api` scope, stored as a masked CI/CD variable.
 
 ## Permissions
 
-couplingguard needs:
+For GitHub Actions, couplingguard needs:
 - `contents: read` to read the git history.
 - `pull-requests: write` to post / edit the comment.
 
-That's it. Nothing else is touched.
+For GitLab CI, the `GITLAB_TOKEN` needs `api` scope on the project.
+
+When `publish_dashboard: true`, the action writes `coupling-history.json`,
+`coupling-dashboard.html`, and `coupling-score.json` to the workspace and
+uploads them as a GitHub Actions artifact. Nothing is committed back to
+your repo unless you add an explicit `git commit && git push` step yourself.
 
 ## FAQ
 
@@ -155,10 +183,20 @@ That's it. Nothing else is touched.
 
 ## Differentiators
 
-- **vs CodeScene** — Free, OSS, runs entirely in your CI. CodeScene is $1k+/month.
-- **vs code-maat** — 2016 Java toy, unmaintained, no Action, no normalization. couplingguard is a maintained Python Action with PR-time comments.
-- **vs Danger.js** — Danger requires you to write coupling rules yourself. couplingguard ships them.
-- **vs CODEOWNERS** — Static ownership vs dynamic co-change. Complementary: couplingguard uses CODEOWNERS to suggest *better* reviewers.
+- **vs CodeScene** — Free and open source; runs entirely in your CI with no external service. CodeScene is a commercial product with per-seat pricing.
+- **vs [code-maat](https://github.com/adamtornhill/code-maat)** — code-maat is a Clojure CLI for post-hoc analysis: you run it against a checked-out repo and read CSV. couplingguard runs at PR time, produces normalized scores, and posts directly to the PR.
+- **vs Danger.js** — Danger is a framework where you write the analysis rules yourself. couplingguard is a zero-config drop-in.
+- **vs CODEOWNERS** — Static ownership vs dynamic co-change. Complementary: couplingguard uses CODEOWNERS to suggest *better* reviewers for the files historically coupled to your PR's files.
+
+## Limitations
+
+Known constraints in v0.1.0:
+
+- **Shallow clones are rejected.** Detected and surfaced as error E001 with an actionable message. Add `fetch-depth: 0` (GitHub) or `GIT_DEPTH: "0"` (GitLab).
+- **PR file cap at 200.** PRs touching more than 200 files are truncated with a warning. The pairs analysis is O(200 × matrix_size), so this is a deliberate ceiling.
+- **No auto-commit of dashboard files.** `publish_dashboard: true` produces an artifact; pushing the score JSON back to `main` for badge updates is on the v0.2 roadmap.
+- **GitLab self-managed not officially tested.** Should work via `CI_SERVER_URL` but only tested against gitlab.com.
+- **Bitbucket / Azure DevOps** — not supported in v0.1.0.
 
 ## Contributing
 
