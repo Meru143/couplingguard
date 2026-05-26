@@ -1,0 +1,194 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" role="img" aria-label="Animated demo: couplingguard analyzes a PR and posts a comment with coupled-file pairs">
+  <defs>
+    <linearGradient id="demoBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#1e1b4b"/>
+    </linearGradient>
+    <radialGradient id="riskGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ef4444" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ef4444" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="3" result="offsetblur"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.45"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="600" fill="url(#demoBg)"/>
+
+  <!-- Faint grid -->
+  <g stroke="#334155" stroke-width="1" opacity="0.15">
+    <path d="M0 50 H1200 M0 100 H1200 M0 150 H1200 M0 200 H1200 M0 250 H1200 M0 300 H1200 M0 350 H1200 M0 400 H1200 M0 450 H1200 M0 500 H1200 M0 550 H1200"/>
+    <path d="M50 0 V600 M100 0 V600 M150 0 V600 M200 0 V600 M250 0 V600 M300 0 V600 M350 0 V600 M400 0 V600 M450 0 V600 M500 0 V600 M550 0 V600 M600 0 V600 M650 0 V600 M700 0 V600 M750 0 V600 M800 0 V600 M850 0 V600 M900 0 V600 M950 0 V600 M1000 0 V600 M1050 0 V600 M1100 0 V600 M1150 0 V600"/>
+  </g>
+
+  <!-- Title -->
+  <g transform="translate(40 50)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif">
+    <text font-weight="700" font-size="28" fill="#f8fafc">couplingguard analyzes a PR</text>
+    <text y="28" font-weight="400" font-size="15" fill="#94a3b8">git log → co-change matrix → normalize → PR filter → 🟢🟡🔴 comment</text>
+  </g>
+
+  <!-- Step 1: Commit history (left column) -->
+  <g transform="translate(60 130)" font-family="ui-monospace, SFMono-Regular, monospace" font-size="13">
+    <text fill="#94a3b8" font-weight="600" font-size="12" letter-spacing="2">GIT HISTORY (90 DAYS)</text>
+
+    <!-- Commits appear in sequence -->
+    <g opacity="0">
+      <rect x="0" y="20" width="320" height="30" rx="5" fill="#1e293b" stroke="#334155"/>
+      <text x="14" y="40" fill="#cbd5e1">a3f9c2 src/payment.py + src/billing.py</text>
+      <animate attributeName="opacity" from="0" to="1" begin="0.3s" dur="0.4s" fill="freeze"/>
+    </g>
+    <g opacity="0">
+      <rect x="0" y="55" width="320" height="30" rx="5" fill="#1e293b" stroke="#334155"/>
+      <text x="14" y="75" fill="#cbd5e1">b1d8e3 src/payment.py + tests/test_billing.py</text>
+      <animate attributeName="opacity" from="0" to="1" begin="0.6s" dur="0.4s" fill="freeze"/>
+    </g>
+    <g opacity="0">
+      <rect x="0" y="90" width="320" height="30" rx="5" fill="#1e293b" stroke="#334155"/>
+      <text x="14" y="110" fill="#cbd5e1">c92ef0 src/billing.py + src/payment.py</text>
+      <animate attributeName="opacity" from="0" to="1" begin="0.9s" dur="0.4s" fill="freeze"/>
+    </g>
+    <g opacity="0">
+      <rect x="0" y="125" width="320" height="30" rx="5" fill="#1e293b" stroke="#334155"/>
+      <text x="14" y="145" fill="#cbd5e1">d05fa1 src/payment.py + src/billing.py</text>
+      <animate attributeName="opacity" from="0" to="1" begin="1.2s" dur="0.4s" fill="freeze"/>
+    </g>
+    <g opacity="0">
+      <rect x="0" y="160" width="320" height="30" rx="5" fill="#1e293b" stroke="#334155"/>
+      <text x="14" y="180" fill="#cbd5e1">e7baf4 src/utils.py</text>
+      <animate attributeName="opacity" from="0" to="1" begin="1.5s" dur="0.4s" fill="freeze"/>
+    </g>
+    <text y="220" fill="#475569" font-size="12">+ 42 more commits…</text>
+  </g>
+
+  <!-- Step 2: Co-change matrix (middle) -->
+  <g transform="translate(450 130)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" opacity="0">
+    <animate attributeName="opacity" from="0" to="1" begin="1.8s" dur="0.6s" fill="freeze"/>
+    <text fill="#94a3b8" font-weight="600" font-size="12" letter-spacing="2">CO-CHANGE MATRIX</text>
+
+    <!-- Score: 41 / max(50, 50) = 0.82 - shown as math -->
+    <g transform="translate(0 30)" font-family="ui-monospace, SFMono-Regular, monospace">
+      <rect width="280" height="220" rx="10" fill="#1e293b" stroke="#334155"/>
+
+      <!-- pair 1 -->
+      <text x="20" y="40" fill="#cbd5e1" font-size="13">payment.py × billing.py</text>
+      <text x="20" y="60" fill="#94a3b8" font-size="11">co_count = 41</text>
+      <text x="20" y="76" fill="#94a3b8" font-size="11">max(50, 50) = 50</text>
+      <line x1="20" y1="85" x2="170" y2="85" stroke="#475569" stroke-width="1"/>
+      <text x="20" y="105" fill="#ef4444" font-size="15" font-weight="700">score = 0.82  🔴</text>
+
+      <!-- pair 2 -->
+      <text x="20" y="135" fill="#cbd5e1" font-size="13">payment.py × test_billing.py</text>
+      <text x="20" y="155" fill="#94a3b8" font-size="11">co_count = 32</text>
+      <text x="20" y="171" fill="#94a3b8" font-size="11">max(50, 50) = 50</text>
+      <line x1="20" y1="180" x2="170" y2="180" stroke="#475569" stroke-width="1"/>
+      <text x="20" y="200" fill="#f59e0b" font-size="15" font-weight="700">score = 0.64  🟡</text>
+    </g>
+  </g>
+
+  <!-- Arrow from history to matrix -->
+  <g opacity="0">
+    <animate attributeName="opacity" from="0" to="1" begin="1.6s" dur="0.4s" fill="freeze"/>
+    <path d="M395 240 L440 240" stroke="#64748b" stroke-width="2" marker-end="url(#arrowHead)"/>
+  </g>
+
+  <!-- PR comment on right -->
+  <g transform="translate(780 130)" opacity="0">
+    <animate attributeName="opacity" from="0" to="1" begin="2.5s" dur="0.6s" fill="freeze"/>
+    <text fill="#94a3b8" font-weight="600" font-size="12" letter-spacing="2" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif">RENDERED PR COMMENT</text>
+
+    <!-- Comment card -->
+    <g transform="translate(0 30)">
+      <rect width="380" height="370" rx="10" fill="#0d1117" stroke="#30363d" filter="url(#dropShadow)"/>
+
+      <!-- Header -->
+      <text x="20" y="35" fill="#e6edf3" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" font-size="15" font-weight="600">🔍 couplingguard</text>
+      <text x="20" y="58" fill="#7d8590" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" font-size="13">2 pairs detected, highest risk:</text>
+
+      <!-- Big risk badge with glow -->
+      <g transform="translate(310 50)">
+        <circle r="35" fill="url(#riskGlow)" opacity="0">
+          <animate attributeName="opacity" from="0" to="1" begin="2.9s" dur="0.5s" fill="freeze"/>
+          <animate attributeName="r" from="20" to="40" values="35;42;35" begin="3.4s" dur="2s" repeatCount="3"/>
+        </circle>
+        <text text-anchor="middle" y="6" fill="#ef4444" font-size="22" font-weight="800" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif">🔴 0.82</text>
+      </g>
+
+      <!-- Table header -->
+      <g transform="translate(20 90)" font-family="ui-monospace, SFMono-Regular, monospace" font-size="11">
+        <text fill="#7d8590">File in PR</text>
+        <text x="120" fill="#7d8590">Coupled with</text>
+        <text x="250" fill="#7d8590">Score</text>
+        <text x="300" fill="#7d8590">Co-ch</text>
+        <line x1="0" y1="6" x2="340" y2="6" stroke="#30363d"/>
+      </g>
+
+      <!-- Row 1 -->
+      <g transform="translate(20 120)" font-family="ui-monospace, SFMono-Regular, monospace" font-size="11">
+        <text fill="#e6edf3">payment.py</text>
+        <text x="120" fill="#e6edf3">billing.py</text>
+        <text x="250" fill="#ef4444" font-weight="700">0.82</text>
+        <text x="300" fill="#7d8590">41/50</text>
+      </g>
+
+      <!-- Row 2 -->
+      <g transform="translate(20 150)" font-family="ui-monospace, SFMono-Regular, monospace" font-size="11">
+        <text fill="#e6edf3">payment.py</text>
+        <text x="120" fill="#e6edf3">test_billing.py</text>
+        <text x="250" fill="#f59e0b" font-weight="700">0.64</text>
+        <text x="300" fill="#7d8590">32/50</text>
+      </g>
+
+      <!-- Delta line (appears later) -->
+      <g transform="translate(20 200)" opacity="0">
+        <animate attributeName="opacity" from="0" to="1" begin="4.2s" dur="0.4s" fill="freeze"/>
+        <rect x="-4" y="-16" width="345" height="36" rx="4" fill="#1f2937" stroke="#f59e0b" stroke-opacity="0.4"/>
+        <text fill="#e6edf3" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" font-size="12">
+          ⚠️ Score changed since last push:
+        </text>
+        <text y="16" fill="#f59e0b" font-family="ui-monospace, SFMono-Regular, monospace" font-size="13" font-weight="700">
+          🟡 0.45 → 🔴 0.82 ↑
+        </text>
+      </g>
+
+      <!-- Reviewers (appears later) -->
+      <g transform="translate(20 270)" opacity="0">
+        <animate attributeName="opacity" from="0" to="1" begin="4.8s" dur="0.4s" fill="freeze"/>
+        <text fill="#7d8590" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" font-size="12">Suggested reviewers (via CODEOWNERS):</text>
+        <text y="20" fill="#58a6ff" font-family="ui-monospace, SFMono-Regular, monospace" font-size="13">@alice  @team-payments</text>
+      </g>
+
+      <!-- CI check -->
+      <g transform="translate(20 320)" opacity="0">
+        <animate attributeName="opacity" from="0" to="1" begin="5.4s" dur="0.4s" fill="freeze"/>
+        <rect x="-4" y="-12" width="345" height="32" rx="4" fill="#3c1818" stroke="#ef4444" stroke-opacity="0.6"/>
+        <text x="6" y="8" fill="#ef4444" font-family="ui-monospace, SFMono-Regular, monospace" font-size="12" font-weight="700">
+          ✗ fail_threshold=high (0.7) crossed — exit 1
+        </text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Arrow from matrix to comment -->
+  <g opacity="0">
+    <animate attributeName="opacity" from="0" to="1" begin="2.3s" dur="0.4s" fill="freeze"/>
+    <path d="M735 240 L770 240" stroke="#64748b" stroke-width="2"/>
+    <polygon points="765,234 775,240 765,246" fill="#64748b"/>
+  </g>
+
+  <!-- Footer hint -->
+  <g transform="translate(40 560)" opacity="0">
+    <animate attributeName="opacity" from="0" to="1" begin="5.8s" dur="0.5s" fill="freeze"/>
+    <text font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" font-size="13" fill="#64748b">
+      Install in 5 lines of YAML →   <tspan fill="#94a3b8">github.com/Meru143/couplingguard</tspan>
+    </text>
+  </g>
+
+  <defs>
+    <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <polygon points="0,0 8,3 0,6" fill="#64748b"/>
+    </marker>
+  </defs>
+</svg>

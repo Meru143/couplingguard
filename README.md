@@ -1,13 +1,25 @@
-# couplingguard
+<p align="center">
+  <img src="assets/hero-banner.svg" alt="couplingguard — Detect file coupling risk in PRs from git co-change history" width="100%">
+</p>
 
-[![coupling](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Meru143/couplingguard/main/coupling-score.json)](https://github.com/Meru143/couplingguard)
-[![CI](https://github.com/Meru143/couplingguard/actions/workflows/ci.yml/badge.svg)](https://github.com/Meru143/couplingguard/actions/workflows/ci.yml)
+<p align="center">
+  <a href="https://github.com/Meru143/couplingguard"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Meru143/couplingguard/main/coupling-score.json" alt="coupling badge"></a>
+  <a href="https://github.com/Meru143/couplingguard/actions/workflows/ci.yml"><img src="https://github.com/Meru143/couplingguard/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license"></a>
+  <a href="docs/marketing/coupling-cheatsheet.md"><img src="https://img.shields.io/badge/cheatsheet-1%20page-orange.svg" alt="coupling cheatsheet"></a>
+</p>
 
 > **Status: v0.1.0 — first release.** The `Meru143/couplingguard@v1` tag and the `couplingguard` PyPI package both ship after the first tagged release lands. Until then, pin to a commit SHA or install from source.
 
-Detect file coupling risk in pull requests from git co-change history. A free GitHub Action that posts a collapsible markdown comment on every PR with normalized coupling scores for the changed files, suggests reviewers from CODEOWNERS for the coupled files, edits itself with a delta line on re-push, and can optionally fail the build above a configurable threshold.
+**Two files that always break together still ship in the same PR with no one looking at both sides.** Your git log has known about this pairing for months. couplingguard surfaces it as a comment on every PR — before the bug, not after the post-mortem.
 
-GitLab CI is supported via the same algorithm — set `GITLAB_TOKEN` and the action posts an MR note instead.
+A free GitHub Action (and GitLab CI integration, and Python CLI) that walks 90 days of git history, builds a normalized co-change matrix, filters to pairs touching your PR's changed files, and posts a collapsible markdown comment with risk badges. Optionally fails CI above a configurable coupling threshold. Suggests reviewers from CODEOWNERS for the coupled files. Edits itself in place on re-push with a `🟡 0.45 → 🔴 0.82` delta line.
+
+<p align="center">
+  <img src="assets/animated-demo.svg" alt="Animated walkthrough: git log → co-change matrix → rendered PR comment" width="100%">
+</p>
+
+> 📺 **Want an MP4 or GIF of the demo?** A Remotion project lives at [`demo/remotion/`](demo/remotion/) — `npm install && npm run build` produces a real video. The animated SVG above is the equivalent for inline rendering.
 
 ## Install in 5 lines
 
@@ -197,6 +209,18 @@ Known constraints in v0.1.0:
 - **No auto-commit of dashboard files.** `publish_dashboard: true` produces an artifact; pushing the score JSON back to `main` for badge updates is on the v0.2 roadmap.
 - **GitLab self-managed not officially tested.** Should work via `CI_SERVER_URL` but only tested against gitlab.com.
 - **Bitbucket / Azure DevOps** — not supported in v0.1.0.
+
+## Marketing kit
+
+If you're forking, extending, or just curious about how this is positioned:
+all the launch copy lives in [`docs/marketing/`](docs/marketing/) —
+launch tweet thread, Show HN draft, blog post, Marketplace listing copy,
+launch-day playbook, and a 1-page **coupling cheatsheet** ([read it](docs/marketing/coupling-cheatsheet.md))
+that doubles as a lead-magnet PDF.
+
+Video / GIF assets render from the Remotion project at
+[`demo/remotion/`](demo/remotion/). Static SVG assets (hero banner +
+animated demo) live at [`assets/`](assets/) and are embedded above.
 
 ## Contributing
 
