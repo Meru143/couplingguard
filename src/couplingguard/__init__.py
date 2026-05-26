@@ -42,7 +42,7 @@ from .models import (
 from .pr_analyzer import analyze_pr, load_pr_files
 from .renderer import render_comment, render_info_comment
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 log = logging.getLogger("couplingguard")
 

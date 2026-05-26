@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] — 2026-05-26
+## [0.1.1] — 2026-05-26
+
+### Fixed
+- Release workflow now syncs the `pyproject.toml` and
+  `src/couplingguard/__init__.py` version to the tag-derived PEP 440
+  version *before* `python -m build` runs. The previous workflow only
+  verified the base version matched and let the build read the static
+  `pyproject.toml` version, so a pre-release tag like `v0.1.0-rc1`
+  produced a `0.1.0` (not `0.1.0rc1`) wheel.
+- `v0.1.0` on PyPI is yanked. Use `0.1.1` going forward.
+
+## [0.1.0] — 2026-05-26 (yanked)
 
 ### Added
 

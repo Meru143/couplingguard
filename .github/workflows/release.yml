@@ -62,18 +62,71 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install build
 
-      - name: Verify pyproject version matches tag
+      - name: Sync pyproject version to tag (PEP 440 normalized)
         run: |
-          PY_VER=$(python -c "import tomllib,sys; print(tomllib.loads(open('pyproject.toml','rb').read().decode())['project']['version'])")
-          TAG_VER="${{ steps.tagname.outputs.version }}"
-          # Strip pre-release suffix (e.g. -rc1) when comparing — pre-releases
-          # are allowed to ride on the same base version as the final release.
-          BASE_TAG_VER="${TAG_VER%%-*}"
-          if [ "$PY_VER" != "$BASE_TAG_VER" ]; then
-            echo "::error::pyproject.toml version ($PY_VER) does not match tag ($TAG_VER / base $BASE_TAG_VER)."
-            exit 1
-          fi
-          echo "Version check OK: pyproject=$PY_VER, tag=$TAG_VER"
+          python <<'PY'
+          import pathlib
+          import re
+          import tomllib
+
+          tag = "${{ steps.tagname.outputs.tag }}"
+          tag_ver = tag.lstrip("v")
+
+          # PEP 440 normalization of pre-release tags. We support the three
+          # forms semantic-version users typically reach for:
+          #   v0.1.0-rc1     -> 0.1.0rc1
+          #   v0.1.0-beta.2  -> 0.1.0b2
+          #   v0.1.0-alpha1  -> 0.1.0a1
+          # Plain v0.1.0 passes through unchanged.
+          normalized = tag_ver
+          for src, dst in (("-rc.", "rc"), ("-rc", "rc"),
+                           ("-beta.", "b"), ("-beta", "b"),
+                           ("-alpha.", "a"), ("-alpha", "a")):
+              normalized = normalized.replace(src, dst)
+
+          path = pathlib.Path("pyproject.toml")
+          original = path.read_text()
+          new_text, n = re.subn(
+              r'^version = ".*"',
+              f'version = "{normalized}"',
+              original,
+              count=1,
+              flags=re.MULTILINE,
+          )
+          if n != 1:
+              raise SystemExit(
+                  f"::error::could not find/replace project.version in pyproject.toml (matches={n})"
+              )
+          path.write_text(new_text)
+
+          # Sanity-check the result parses back to what we expect.
+          parsed = tomllib.loads(new_text)
+          got = parsed["project"]["version"]
+          if got != normalized:
+              raise SystemExit(
+                  f"::error::pyproject.toml rewrite produced {got!r}, expected {normalized!r}"
+              )
+          # Also sync the __version__ in __init__.py so `couplingguard.__version__`
+          # reports the right thing at runtime.
+          init_path = pathlib.Path("src/couplingguard/__init__.py")
+          init_text = init_path.read_text(encoding="utf-8")
+          init_text, m = re.subn(
+              r'^__version__ = ".*"',
+              f'__version__ = "{normalized}"',
+              init_text,
+              count=1,
+              flags=re.MULTILINE,
+          )
+          if m != 1:
+              raise SystemExit("::error::could not find __version__ in src/couplingguard/__init__.py")
+          init_path.write_text(init_text, encoding="utf-8")
+
+          print(f"tag={tag} -> normalized={normalized}")
+          PY
+          echo "--- pyproject.toml version line ---"
+          grep -E '^version = ' pyproject.toml
+          echo "--- __init__.py version line ---"
+          grep -E '^__version__' src/couplingguard/__init__.py
 
       - name: Build sdist + wheel
         run: python -m build
