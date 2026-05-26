@@ -228,22 +228,6 @@ tuning per repo type (solo, small team, monorepo, mature OSS library).
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Bugs → [Issues](https://github.com/Meru143/couplingguard/issues). Security → [SECURITY.md](SECURITY.md).
 
-## Publishing to the GitHub Marketplace
-
-GitHub Marketplace categories and featured tags are configured **in the
-GitHub web UI**, not in `action.yml`. After tagging a release:
-
-1. Open the new release on the **Releases** page.
-2. Click **Publish this Action to the GitHub Marketplace**.
-3. Accept the Marketplace terms.
-4. Choose **two categories** from the dropdown — recommended:
-   *Code quality* and *Continuous integration*.
-5. Add **featured tags**: `code-quality`, `pull-request`, `git`,
-   `coupling`, `static-analysis`.
-
-The `branding.icon` (`git-branch`) and `branding.color` (`orange`) from
-`action.yml` are picked up automatically as the listing badge.
-
 ## License
 
 MIT. See [LICENSE](LICENSE).
