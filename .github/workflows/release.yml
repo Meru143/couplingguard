@@ -1,10 +1,14 @@
 name: Release
 
-# Run only when explicitly dispatched or when a vX.Y.Z tag is pushed.
-# This avoids semantic-release attempting to publish on every commit
-# to main before PyPI Trusted Publishing is configured.
+# Tag-driven release: the tag IS the version. semantic-release was
+# removed because it expects to compute the version from commits and
+# create the tag itself, which fought the tag-push trigger below.
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v0.1.0). Must already exist."
+        required: true
   push:
     tags:
       - "v*.*.*"
@@ -28,30 +32,93 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # Use a real PAT only if we need to push the v1 tag back to
+          # a protected branch; the default GITHUB_TOKEN can push tags
+          # so we don't need anything fancier.
+
+      - name: Resolve tag name
+        id: tagname
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          if [ -z "$TAG" ]; then
+            echo "::error::Could not determine tag name."
+            exit 1
+          fi
+          VERSION="${TAG#v}"
+          echo "tag=$TAG"     >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Releasing tag=$TAG version=$VERSION"
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Install build tooling
-        run: pip install python-semantic-release build
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
 
-      - name: Build distribution
+      - name: Verify pyproject version matches tag
+        run: |
+          PY_VER=$(python -c "import tomllib,sys; print(tomllib.loads(open('pyproject.toml','rb').read().decode())['project']['version'])")
+          TAG_VER="${{ steps.tagname.outputs.version }}"
+          # Strip pre-release suffix (e.g. -rc1) when comparing — pre-releases
+          # are allowed to ride on the same base version as the final release.
+          BASE_TAG_VER="${TAG_VER%%-*}"
+          if [ "$PY_VER" != "$BASE_TAG_VER" ]; then
+            echo "::error::pyproject.toml version ($PY_VER) does not match tag ($TAG_VER / base $BASE_TAG_VER)."
+            exit 1
+          fi
+          echo "Version check OK: pyproject=$PY_VER, tag=$TAG_VER"
+
+      - name: Build sdist + wheel
         run: python -m build
 
-      - name: Run semantic-release
-        id: release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: semantic-release publish
+      - name: Verify build output
+        run: |
+          ls -lh dist/
+          test -f dist/*.whl
+          test -f dist/*.tar.gz
 
       - name: Publish to PyPI via Trusted Publishing
-        if: steps.release.outputs.released == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
+        # No api token needed — Trusted Publisher OIDC handles auth.
+        # Pre-release tags (e.g. v0.1.0-rc1) upload too; PyPI marks them
+        # as pre-releases automatically based on PEP 440 version parsing.
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Build a brief release body from the CHANGELOG's [Unreleased]
+          # section (if present) or fall back to a minimal note.
+          BODY_FILE=$(mktemp)
+          if grep -q "^## \[Unreleased\]" CHANGELOG.md 2>/dev/null; then
+            awk '/^## \[Unreleased\]/{flag=1; next} /^## /{flag=0} flag' CHANGELOG.md > "$BODY_FILE"
+          fi
+          if [ ! -s "$BODY_FILE" ]; then
+            echo "Release ${{ steps.tagname.outputs.tag }}." > "$BODY_FILE"
+          fi
+
+          PRERELEASE_FLAG=""
+          if [[ "${{ steps.tagname.outputs.tag }}" == *-* ]]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+
+          gh release create "${{ steps.tagname.outputs.tag }}" \
+            --title "${{ steps.tagname.outputs.tag }}" \
+            --notes-file "$BODY_FILE" \
+            $PRERELEASE_FLAG \
+            dist/*.whl dist/*.tar.gz
 
       - name: Update v1 major-version tag
-        if: steps.release.outputs.released == 'true'
+        # Only move v1 on stable releases (no pre-release suffix). rc / beta
+        # tags should not advance the major-version pointer.
+        if: ${{ !contains(steps.tagname.outputs.tag, '-') }}
         run: |
           git tag -f v1
           git push -f origin v1
