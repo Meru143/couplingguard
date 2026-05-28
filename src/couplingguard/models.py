@@ -1,5 +1,24 @@
 from dataclasses import dataclass, field
 
+# Alias coupling-core's exception classes so anything raised by the algorithm
+# library (open_repo, get_commits, build_normalized_matrix) propagates through
+# couplingguard's existing `except CouplingGuardError` / `except ShallowCloneError`
+# catch boundaries. CouplingGuardError == CouplingCoreError as classes (same
+# class object, just two names). Tests that catch couplingguard's names
+# continue to work; new code can use either name interchangeably.
+from coupling_core import CouplingCoreError as CouplingGuardError
+from coupling_core import ShallowCloneError as ShallowCloneError  # noqa: PLC0414
+
+__all__ = [
+    "Config",
+    "ConfigError",
+    "CouplingGuardError",
+    "CouplingPair",
+    "GitHubAuthError",
+    "PRAnalysis",
+    "ShallowCloneError",
+]
+
 
 @dataclass
 class Config:
@@ -35,13 +54,10 @@ class PRAnalysis:
     previous_max_score: float | None = None
 
 
-class CouplingGuardError(Exception):
-    """Base exception for all couplingguard runtime errors."""
-
-
-class ShallowCloneError(CouplingGuardError):
-    """Raised when the repo is a shallow clone and fetch-depth: 0 is needed."""
-
+# CouplingGuardError and ShallowCloneError are imported from coupling_core at
+# the top of this file. ConfigError and GitHubAuthError remain couplingguard-
+# specific subclasses — they're errors about couplingguard's surface area
+# (YAML config, GitHub API auth), not about the algorithm itself.
 
 class ConfigError(CouplingGuardError):
     """Raised when .couplingguard.yml or action inputs cannot be parsed."""

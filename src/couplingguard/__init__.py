@@ -6,6 +6,15 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from coupling_core import (
+    Config as CoreConfig,
+)
+from coupling_core import (
+    build_normalized_matrix,
+    get_commits,
+    open_repo,
+)
+
 from .codeowners_loader import load_codeowners, suggest_reviewers
 from .config import load_config
 from .dashboard import (
@@ -17,7 +26,6 @@ from .dashboard import (
     save_history,
 )
 from .delta import get_previous_max_score
-from .git_parser import get_commits, open_repo
 from .github_poster import (
     check_fail_threshold,
     find_existing_comment,
@@ -32,7 +40,6 @@ from .gitlab_poster import (
     is_gitlab_ci,
     post_mr_note,
 )
-from .matrix import build_normalized_matrix
 from .models import (
     Config,
     CouplingGuardError,
@@ -205,7 +212,18 @@ def run(repo_root: Path, action_inputs: dict[str, Any] | None = None) -> int:
             )
             return 0
 
-        matrix, file_counts = build_normalized_matrix(commits, config)
+        # coupling_core.build_normalized_matrix takes a coupling_core.Config
+        # (subset of couplingguard's Config — no max_pairs/fail_threshold/
+        # dry_run/publish_dashboard). Adapt down to just the fields the
+        # matrix builder actually consumes.
+        core_config = CoreConfig(
+            lookback_days=config.lookback_days,
+            min_occurrences=config.min_occurrences,
+            low_threshold=config.low_threshold,
+            high_threshold=config.high_threshold,
+            exclude=config.exclude,
+        )
+        matrix, file_counts = build_normalized_matrix(commits, core_config)
 
         pr_number, pr_files = load_pr_files(repo)
         if not pr_files:

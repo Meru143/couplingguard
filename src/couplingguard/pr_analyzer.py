@@ -6,8 +6,8 @@ import os
 from typing import Any
 
 import git
+from coupling_core.matrix import NormalizedMatrix
 
-from .matrix import NormalizedMatrix
 from .models import Config, CouplingGuardError, CouplingPair, PRAnalysis
 
 log = logging.getLogger(__name__)
