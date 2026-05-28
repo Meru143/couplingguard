@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "couplingguard"
-version = "0.1.1"
+version = "0.1.2"
 description = "Detect file coupling risk in pull requests from git co-change history."
 readme = "README.md"
 license = { file = "LICENSE" }

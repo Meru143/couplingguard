@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] — 2026-05-27
+
+### Changed
+- **Algorithm extracted to [`coupling-core`](https://pypi.org/project/coupling-core/) (>=1.0.1, <2.0).**
+  The git-history parser and co-change matrix builder no longer ship in this
+  package — they live in `coupling-core`, a standalone library that any
+  project can consume for co-change analysis. couplingguard now depends on
+  it and consumes its public API. No user-facing behaviour change: install
+  resolves both packages, the Action runs identically, and the PR comment
+  output is byte-for-byte the same.
+- `couplingguard.models.CouplingGuardError` is now an alias for
+  `coupling_core.CouplingCoreError` (same class object, two names), and
+  `couplingguard.models.ShallowCloneError` is an alias for
+  `coupling_core.ShallowCloneError`. Code that catches either name keeps
+  working; new code can use either interchangeably. `ConfigError` and
+  `GitHubAuthError` remain couplingguard-specific subclasses.
+
+### Removed
+- `couplingguard.git_parser` module (moved to `coupling_core.git_parser`).
+- `couplingguard.matrix` module (moved to `coupling_core.matrix`).
+- 28 unit tests that exercised the extracted modules (now upstream in
+  coupling-core's own test suite). The end-to-end and dogfood tests still
+  exercise the full pipeline through coupling-core.
+
+### Internal
+- Test count: 148 (was 177; the 29-test drop reflects only the extracted
+  unit tests).
+- coverage, ruff, mypy `--strict` all still clean.
+
 ## [0.1.1] — 2026-05-26
 
 ### Fixed
