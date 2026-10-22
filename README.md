@@ -14,7 +14,7 @@
 <p align="center">
   <a href="#install-in-5-lines"><img src="https://img.shields.io/badge/github_action-✓-2ea44f" alt="GitHub Action"></a>
   <a href="#gitlab-ci"><img src="https://img.shields.io/badge/gitlab_ci-✓-fc6d26" alt="GitLab CI"></a>
-  <img src="https://img.shields.io/badge/177_tests-90%25_coverage-2ea44f" alt="177 tests · 90% coverage">
+  <img src="https://img.shields.io/badge/148_tests-89%25_coverage-2ea44f" alt="148 tests · 89% coverage">
   <img src="https://img.shields.io/badge/category-code--quality-blue" alt="code quality">
   <img src="https://img.shields.io/badge/category-pull--request-blue" alt="pull request">
   <img src="https://img.shields.io/badge/category-static--analysis-blue" alt="static analysis">
