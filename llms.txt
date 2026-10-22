@@ -37,7 +37,7 @@ PyPI: `pip install couplingguard` then `couplingguard --repo . --dry-run`
 - Marketplace: https://github.com/marketplace/actions/couplingguard
 - License: MIT
 - Latest version: see https://pypi.org/project/couplingguard/
-- Tests: 177 unit + integration + E2E, 90% line coverage
+- Tests: 148 unit + integration + E2E, 89% line coverage
 - Dependencies (runtime): GitPython, PyGithub, python-gitlab, codeowners, PyYAML
 - Supports: GitHub Actions (composite), GitLab CI, local CLI
 

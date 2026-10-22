@@ -58,4 +58,5 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install pip-audit
-      - run: pip-audit
+      # Audit couplingguard's resolved runtime dependencies, not the runner's own packages.
+      - run: pip-audit .
